@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GreenApiError } from "@/shared/api/errors";
-import { sendMessage } from "@/shared/api/green-api";
+import { receiveNotification, sendMessage } from "@/shared/api/green-api";
 
 const credentials = { idInstance: "instance-1", apiTokenInstance: "token-1" };
 
@@ -33,5 +33,18 @@ describe("GREEN-API client", () => {
       GreenApiError,
     );
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps long polling below the Netlify proxy timeout", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response("null", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      receiveNotification(credentials, new AbortController().signal),
+    ).resolves.toBeNull();
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("/receiveNotification/token-1?receiveTimeout=20"),
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
   });
 });

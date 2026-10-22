@@ -13,7 +13,8 @@ import { GREEN_API_BASE_URL } from "@/shared/config/env";
 export type GreenApiCredentials = z.infer<typeof credentialsSchema>;
 export type GreenApiNotification = z.infer<typeof receiveNotificationResponseSchema>;
 
-const DEFAULT_RECEIVE_TIMEOUT_SECONDS = 30;
+// Netlify proxy rewrites time out at 26 seconds, so keep long polling below that limit.
+const DEFAULT_RECEIVE_TIMEOUT_SECONDS = 20;
 
 function methodUrl(credentials: GreenApiCredentials, method: string) {
   const { idInstance, apiTokenInstance } = credentialsSchema.parse(credentials);
