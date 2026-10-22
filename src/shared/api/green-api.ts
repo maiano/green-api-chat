@@ -63,7 +63,11 @@ export async function receiveNotification(
   return requestJson(url, responseSchema, { signal });
 }
 
-export async function deleteNotification(credentials: GreenApiCredentials, receiptId: number) {
+export async function deleteNotification(
+  credentials: GreenApiCredentials,
+  receiptId: number,
+  signal?: AbortSignal,
+) {
   const validReceiptId = z.number().int().nonnegative().safeParse(receiptId);
   if (!validReceiptId.success) {
     throw new GreenApiError(
@@ -75,7 +79,7 @@ export async function deleteNotification(credentials: GreenApiCredentials, recei
   const response = await requestJson(
     `${methodUrl(credentials, "deleteNotification")}/${validReceiptId.data}`,
     deleteNotificationResponseSchema,
-    { method: "DELETE" },
+    { method: "DELETE", signal },
   );
 
   if (!response.result) {
