@@ -5,7 +5,10 @@ function parseResponseBody(text: string): unknown {
   try {
     return JSON.parse(text) as unknown;
   } catch {
-    throw new GreenApiError("INVALID_RESPONSE", "GREEN-API вернул ответ в неизвестном формате.");
+    throw new GreenApiError(
+      "INVALID_RESPONSE",
+      "GREEN-API returned an unsupported response format.",
+    );
   }
 }
 
@@ -22,7 +25,7 @@ export async function requestJson<T>(
       throw error;
     throw new GreenApiError(
       "NETWORK_ERROR",
-      "Не удалось связаться с GREEN-API. Проверьте подключение к интернету.",
+      "Could not connect to GREEN-API. Check your internet connection.",
     );
   }
 
@@ -42,7 +45,7 @@ export async function requestJson<T>(
   if (!parsed.success) {
     throw new GreenApiError(
       "INVALID_RESPONSE",
-      "GREEN-API вернул ответ, который не соответствует ожидаемому формату.",
+      "GREEN-API returned a response that does not match the expected format.",
       { details: parsed.error.issues },
     );
   }

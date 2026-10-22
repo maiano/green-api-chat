@@ -29,7 +29,7 @@ export async function sendMessage(
   if (!payload.success) {
     throw new GreenApiError(
       "VALIDATION_ERROR",
-      payload.error.issues[0]?.message ?? "Проверьте текст сообщения.",
+      payload.error.issues[0]?.message ?? "Check the message text.",
     );
   }
 
@@ -52,7 +52,10 @@ export async function receiveNotification(
 ) {
   const timeout = z.number().int().min(5).max(60).safeParse(receiveTimeoutSeconds);
   if (!timeout.success) {
-    throw new GreenApiError("VALIDATION_ERROR", "Таймаут получения должен быть от 5 до 60 секунд.");
+    throw new GreenApiError(
+      "VALIDATION_ERROR",
+      "The receive timeout must be between 5 and 60 seconds.",
+    );
   }
 
   const url = `${methodUrl(credentials, "receiveNotification")}?receiveTimeout=${timeout.data}`;
@@ -65,7 +68,7 @@ export async function deleteNotification(credentials: GreenApiCredentials, recei
   if (!validReceiptId.success) {
     throw new GreenApiError(
       "VALIDATION_ERROR",
-      "Идентификатор уведомления должен быть целым неотрицательным числом.",
+      "The notification ID must be a non-negative integer.",
     );
   }
 
@@ -78,7 +81,7 @@ export async function deleteNotification(credentials: GreenApiCredentials, recei
   if (!response.result) {
     throw new GreenApiError(
       "DELETE_FAILED",
-      response.reason || "GREEN-API не удалил уведомление из очереди.",
+      response.reason || "GREEN-API did not remove the notification from the queue.",
     );
   }
 }

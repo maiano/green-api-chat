@@ -40,7 +40,7 @@ export function normalizeHttpError(status: number, details: unknown) {
   if (normalizedMessage.includes("custom webhook url is set")) {
     return new GreenApiError(
       "WEBHOOK_CONFLICT",
-      "Отключите Webhook в настройках инстанса GREEN-API для получения сообщений.",
+      "Disable the webhook in your GREEN-API instance settings to receive messages.",
       { status, details },
     );
   }
@@ -48,7 +48,7 @@ export function normalizeHttpError(status: number, details: unknown) {
   if (status === 401 || status === 403) {
     return new GreenApiError(
       "UNAUTHORIZED",
-      "GREEN-API отклонил учётные данные. Проверьте ID инстанса и API-токен.",
+      "GREEN-API rejected the credentials. Check the instance ID and API token.",
       { status, details },
     );
   }
@@ -56,7 +56,7 @@ export function normalizeHttpError(status: number, details: unknown) {
   if (status === 429) {
     return new GreenApiError(
       "RATE_LIMITED",
-      "GREEN-API ограничил частоту запросов. Повторите попытку позже.",
+      "GREEN-API rate limited the requests. Try again later.",
       { status, details },
     );
   }
@@ -65,15 +65,14 @@ export function normalizeHttpError(status: number, details: unknown) {
     return new GreenApiError(
       "VALIDATION_ERROR",
       normalizedMessage.includes("message") && normalizedMessage.includes("length")
-        ? "Текст сообщения превышает допустимую длину GREEN-API."
-        : "GREEN-API отклонил запрос. Проверьте параметры и настройки инстанса.",
+        ? "The message exceeds the maximum length accepted by GREEN-API."
+        : "GREEN-API rejected the request. Check the parameters and instance settings.",
       { status, details },
     );
   }
 
-  return new GreenApiError(
-    "HTTP_ERROR",
-    "Не удалось выполнить запрос к GREEN-API. Повторите попытку позже.",
-    { status, details },
-  );
+  return new GreenApiError("HTTP_ERROR", "The GREEN-API request failed. Try again later.", {
+    status,
+    details,
+  });
 }
