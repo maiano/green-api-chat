@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_MESSAGE_LENGTH } from "@/shared/config/messaging";
 
 export const credentialsSchema = z.object({
   idInstance: z.string().trim().min(1, "Instance ID is required"),
@@ -11,7 +12,10 @@ export const sendMessageRequestSchema = z.object({
     .string()
     .trim()
     .min(1, "Message cannot be empty")
-    .max(20_000, "Message cannot exceed 20,000 characters"),
+    .max(
+      MAX_MESSAGE_LENGTH,
+      `Message cannot exceed ${MAX_MESSAGE_LENGTH.toLocaleString("en-US")} characters`,
+    ),
 });
 
 export const sendMessageResponseSchema = z.object({

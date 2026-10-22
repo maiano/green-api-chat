@@ -1,5 +1,5 @@
 import { ArrowRight, MessageCircle, ShieldCheck } from "lucide-react";
-import { type FormEvent, useState } from "react";
+import { type SubmitEvent, useState } from "react";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -11,7 +11,7 @@ export function AuthForm() {
   const [error, setError] = useState("");
   const [warning, setWarning] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setWarning("");

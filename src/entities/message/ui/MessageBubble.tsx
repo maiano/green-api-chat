@@ -7,7 +7,7 @@ type MessageBubbleProps = {
 };
 
 function formatTime(timestamp: number) {
-  return new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit" }).format(timestamp);
+  return new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" }).format(timestamp);
 }
 
 function MessageStatus({ message }: { message: Message }) {
