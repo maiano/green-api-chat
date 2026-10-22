@@ -53,7 +53,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             : "rounded-bl-sm bg-card text-card-foreground",
         )}
       >
-        <p className="whitespace-pre-wrap break-words">{message.text}</p>
+        <p className="whitespace-pre-wrap wrap-break-word">{message.text}</p>
         <footer className="mt-1 flex items-center justify-end gap-1.5 text-[0.6875rem] leading-none text-muted-foreground">
           <time dateTime={new Date(message.timestamp).toISOString()}>
             {formatTime(message.timestamp)}
