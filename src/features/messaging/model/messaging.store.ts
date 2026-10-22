@@ -1,9 +1,16 @@
 import { create } from "zustand";
+import { getPhoneFromChatId } from "@/entities/chat/model/chat-id";
+import type { Chat } from "@/entities/chat/model/types";
 import type { Message } from "@/entities/message/model/types";
 
 type MessagingState = {
+  chats: Record<string, Chat>;
+  activeChatId: string | null;
   messagesByChat: Record<string, Message[]>;
   pollingError: string | null;
+  openChat: (chat: Chat) => void;
+  setActiveChat: (chatId: string | null) => void;
+  clear: () => void;
   addIncomingMessage: (message: Message) => void;
   addOptimisticMessage: (message: Message) => void;
   markMessageSent: (chatId: string, localId: string, externalId: string) => void;
@@ -32,11 +39,33 @@ function appendMessage(
   };
 }
 
-export const useMessagingStore = create<MessagingState>((set) => ({
+const initialState = {
+  chats: {},
+  activeChatId: null,
   messagesByChat: {},
   pollingError: null,
+};
+
+export const useMessagingStore = create<MessagingState>((set) => ({
+  ...initialState,
+  openChat: (chat) =>
+    set((state) => ({
+      chats: { ...state.chats, [chat.id]: chat },
+      activeChatId: chat.id,
+    })),
+  setActiveChat: (activeChatId) => set({ activeChatId }),
+  clear: () => set(initialState),
   addIncomingMessage: (message) =>
-    set((state) => ({ messagesByChat: appendMessage(state.messagesByChat, message) })),
+    set((state) => {
+      const phone = getPhoneFromChatId(message.chatId);
+      return {
+        chats:
+          phone && !state.chats[message.chatId]
+            ? { ...state.chats, [message.chatId]: { id: message.chatId, phone } }
+            : state.chats,
+        messagesByChat: appendMessage(state.messagesByChat, message),
+      };
+    }),
   addOptimisticMessage: (message) =>
     set((state) => ({ messagesByChat: appendMessage(state.messagesByChat, message) })),
   markMessageSent: (chatId, localId, externalId) =>
