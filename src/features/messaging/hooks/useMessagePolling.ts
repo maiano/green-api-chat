@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { toast } from "sonner";
 import { mapIncomingMessage } from "@/entities/message/model/mapper";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import { useMessagingStore } from "@/features/messaging/model/messaging.store";
@@ -45,6 +46,7 @@ export function useMessagePolling() {
 
     const controller = new AbortController();
     let retryDelayMs = INITIAL_RETRY_DELAY_MS;
+    let lastNotifiedError: string | null = null;
 
     async function poll() {
       while (!controller.signal.aborted) {
@@ -53,6 +55,7 @@ export function useMessagePolling() {
           if (controller.signal.aborted) break;
           if (!notification) {
             setPollingError(null);
+            lastNotifiedError = null;
             retryDelayMs = INITIAL_RETRY_DELAY_MS;
             continue;
           }
@@ -63,6 +66,7 @@ export function useMessagePolling() {
 
           if (message) addIncomingMessage(message);
           setPollingError(null);
+          lastNotifiedError = null;
           retryDelayMs = INITIAL_RETRY_DELAY_MS;
         } catch (error) {
           if (
@@ -72,7 +76,22 @@ export function useMessagePolling() {
             break;
           }
 
+          if (error instanceof GreenApiError && error.code === "UNAUTHORIZED") {
+            toast.error(error.message);
+            useMessagingStore.getState().clear();
+            useAuthStore.getState().logout();
+            break;
+          }
+
           setPollingError(getPollingError(error));
+          if (
+            error instanceof GreenApiError &&
+            error.code === "WEBHOOK_CONFLICT" &&
+            lastNotifiedError !== error.code
+          ) {
+            toast.error(error.message);
+            lastNotifiedError = error.code;
+          }
           await waitForRetry(controller.signal, retryDelayMs);
           retryDelayMs = Math.min(retryDelayMs * 2, MAX_RETRY_DELAY_MS);
         }

@@ -1,8 +1,10 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "@/app/routing/ProtectedRoute";
+import { ErrorBoundary } from "@/app/ui/ErrorBoundary";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import { AuthPage } from "@/pages/auth/AuthPage";
 import { ChatPage } from "@/pages/chat/ChatPage";
+import { Toaster } from "@/shared/ui/sonner";
 
 function RootRedirect() {
   const isAuthenticated = useAuthStore((state) => state.credentials !== null);
@@ -16,16 +18,19 @@ function GuestRoute() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<RootRedirect />} />
-        <Route path="/login" element={<GuestRoute />} />
-        <Route element={<ProtectedRoute />}>
-          <Route path="/chat" element={<ChatPage />} />
-        </Route>
-        <Route path="*" element={<RootRedirect />} />
-      </Routes>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<RootRedirect />} />
+          <Route path="/login" element={<GuestRoute />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/chat" element={<ChatPage />} />
+          </Route>
+          <Route path="*" element={<RootRedirect />} />
+        </Routes>
+      </BrowserRouter>
+      <Toaster />
+    </ErrorBoundary>
   );
 }
 

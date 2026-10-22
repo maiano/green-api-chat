@@ -2,6 +2,7 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import { useMessagingStore } from "@/features/messaging/model/messaging.store";
+import { GreenApiError } from "@/shared/api/errors";
 
 const { sendMessageMock } = vi.hoisted(() => ({ sendMessageMock: vi.fn() }));
 
@@ -56,5 +57,20 @@ describe("useSendMessage", () => {
     expect(useMessagingStore.getState().messagesByChat[chatId]).toMatchObject([
       { id: "local-message-1", status: "error", error: "Request failed" },
     ]);
+  });
+
+  it("clears the session when GREEN-API rejects the credentials", async () => {
+    sendMessageMock.mockRejectedValue(
+      new GreenApiError(
+        "UNAUTHORIZED",
+        "GREEN-API rejected the credentials. Check the instance ID and API token.",
+      ),
+    );
+    const { result } = renderHook(() => useSendMessage());
+
+    await act(async () => result.current(chatId, "Hello"));
+
+    expect(useAuthStore.getState().credentials).toBeNull();
+    expect(useMessagingStore.getState().messagesByChat).toEqual({});
   });
 });
